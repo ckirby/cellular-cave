@@ -1,37 +1,38 @@
-from __future__ import print_function
-
-
 class Cave(object):
     def __init__(self, width, height, ratio, generations, *args, **kwargs):
         self.width = width
         self.height = height
         self.generations = generations
-        self.cave = self.make_cave(ratio)
+        self.cave = self.make_cave(ratio*10)
         self.mutate_cave()
 
     def make_cave(self, ratio):
         from random import random
         cave = []
+        random_integers = None
         for x in range(self.height):
             row = []
             for y in range(self.width):
-                row.append(random() < ratio)
+                try:
+                    cell_integer = random_integers.pop()
+                except (IndexError, AttributeError):
+                    random_integers = [int(ri) for ri in str(random()).split('.')[1].split('e')[0]]
+                    cell_integer = random_integers.pop()
+                finally:
+                    row.append(cell_integer < ratio)
             cave.append(row)
 
         return cave
 
     def mutate_cave(self, generation=0):
+        if generation > self.generations:
+            return
+
         new_cave = list(self.cave)
         for x in range(self.height):
             for y in range(self.width):
-                neighbors = self.check_neighbors(x, y)
-                if neighbors > 4:
-                    new_cave[x][y] = True
-                else:
-                    new_cave[x][y] = False
+                new_cave[x][y] = self.check_neighbors(x, y) > 4
 
-        if generation == self.generations:
-            return
         self.cave = new_cave
         self.mutate_cave(generation + 1)
 
@@ -47,8 +48,7 @@ class Cave(object):
         for nx in neighbor_range:
             for ny in neighbor_range:
                 try:
-                    if self.cave[x + nx][y + ny]:
-                        live_neighbors += 1
+                    live_neighbors += 1*self.cave[x + nx][y + ny]
                 except IndexError:
                     live_neighbors += .5
 
