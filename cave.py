@@ -5,14 +5,14 @@ class StableCaveException(Exception):
 
 
 class Cave(object):
-    def __init__(self, width, height, ratio, generations, print):
+    def __init__(self, width, height, ratio, generations, history):
         self.width = width
         self.height = height
         self.generations = generations+1
-        self.run(self.make_cave(ratio), print)
+        self.run(self.make_cave(ratio), history)
 
     def run(self, cave, should_print):
-        for gen in range(1, self.generations):
+        for gen in range(self.generations):
             if should_print:
                 self.print_cave(cave, gen)
             try:
@@ -22,9 +22,9 @@ class Cave(object):
                     self.print_cave(cave)
                 print(f"Cave mutations converged at generation {gen}")
                 break
-
-        if not should_print:
-            self.print_cave(cave)
+        else:
+            if not should_print:
+                self.print_cave(cave)
 
     def make_cave(self, ratio):
         from random import random
@@ -52,6 +52,7 @@ class Cave(object):
 
     def print_cave(self, cave, generation = None):
         if generation is not None:
+            generation = 'randomized seed' if generation==0 else generation
             print(f"Generation {generation}")
         for x in range(self.height):
             for y in range(self.width):
@@ -76,7 +77,7 @@ class Cave(object):
 @click.option('-h', '--height', default=50, help='Cave Height')
 @click.option('-r', '--ratio', default=0.5, help='Ratio of initially alive cells. 0.3-0.6 recommended')
 @click.option('-g', '--generations', default=2, help='Mutation Generations')
-@click.option('-p', '--print', is_flag=True, default=False, help='Print all Generations')
+@click.option('--print/--no-print', 'history', default=False, help='Print all Generations')
 def cave(**kwargs):
     Cave(**kwargs)
 
