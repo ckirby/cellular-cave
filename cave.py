@@ -1,13 +1,15 @@
+
+import click
 class StableCaveException(Exception):
     pass
 
 
 class Cave(object):
-    def __init__(self, width, height, ratio, generations, history):
+    def __init__(self, width, height, ratio, generations, print):
         self.width = width
         self.height = height
         self.generations = generations+1
-        self.run(self.make_cave(ratio), history)
+        self.run(self.make_cave(ratio), print)
 
     def run(self, cave, should_print):
         for gen in range(1, self.generations):
@@ -69,23 +71,15 @@ class Cave(object):
         return live_neighbors
 
 
-def main(**kwargs):
+@click.command()
+@click.option('-w', '--width', default=80, help='Cave Width')
+@click.option('-h', '--height', default=50, help='Cave Height')
+@click.option('-r', '--ratio', default=0.5, help='Ratio of initially alive cells. 0.3-0.6 recommended')
+@click.option('-g', '--generations', default=2, help='Mutation Generations')
+@click.option('-p', '--print', is_flag=True, default=False, help='Print all Generations')
+def cave(**kwargs):
     Cave(**kwargs)
-
-def parse_arguments():
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Generate a Cave Map via Cellular Automata')
-    parser.add_argument('-W', '--width', type=int, default=80, help='Cave Width')
-    parser.add_argument('-H', '--height', type=int, default=50, help='Cave Height')
-    parser.add_argument('-R', '--ratio', type=float, default=0.5, help='Ratio of initially alive cells. 0.3-0.6 recommended')
-    parser.add_argument('-G', '--generations', type=int, default=2, help='Mutation Generations')
-    parser.add_argument('--history', type=bool, default=False, help='Print all Generations')
-
-    args = parser.parse_args()
-    return vars(args)
 
 
 if __name__ == "__main__":
-    arguments = parse_arguments()
-    main(**arguments)
+    cave()
